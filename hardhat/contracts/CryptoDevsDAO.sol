@@ -10,5 +10,8 @@ contract CryptoDevsDAO is Ownable {
      * Interface for the FakeNFTMarketplace
      */
 
-    
+    interface  IFakeNFTMarketplace {
+        
+        
+    }
 }
