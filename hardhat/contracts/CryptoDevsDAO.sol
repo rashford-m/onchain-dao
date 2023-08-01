@@ -38,3 +38,9 @@ interface ICryptoDevsNFT {
         uint256 index
     ) external view returns (uint256);
 }
+ 
+
+// Create a struct named Proposal containing all relevant information
+contract CryptoDevsDAO is Ownable {
+    
+}
