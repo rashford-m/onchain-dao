@@ -33,7 +33,7 @@ interface ICryptoDevsNFT {
     /// @param owner - address to fetch the NFT TokenID for
     /// @param index - index of NFT in owned tokens array to fetch
     /// @return Returns the TokenID of the NFT
-    function tokenOwnerByIndex(
+    function tokenOfOwnerByIndex(
         address owner,
         uint256 index
     ) external view returns (uint256);
@@ -136,7 +136,7 @@ contract CryptoDevsDAO is Ownable {
         }
         require(numVotes > 0, "ALREADY_VOTED");
         if (vote == Vote.YAY) {
-            proposal.YAYvOTES += numVotes;
+            proposal.yayVotes += numVotes;
         } else {
             proposal.nayVotes += numVotes;
         }
@@ -156,4 +156,35 @@ contract CryptoDevsDAO is Ownable {
         );
         _;
     }
+
+    /// @dev executeProposal allows any CryptoDevsNFT holder to execute a proposal after it's deadline has been exceeded
+    /// @param proposalIndex - the index of the proposal to execute in the proposals array
+    function executeProposal(
+        uint256 proposalIndex
+    ) external nftHolderOnly inactiveProposalOnly(proposalIndex) {
+        Proposal storage proposal = proposals[proposalIndex];
+
+        // If the proposal has more YAY votes than NAY votes
+        // purchase the NFT from the FakeNFTMarketplace
+        if (proposal.yayVotes > proposal.nayVotes) {
+            uint256 nftPrice = nftMarketplace.getPrice();
+            require(address(this).balance >= nftPrice, "NOT_ENOUGH_FUNDS");
+            nftMarketplace.purchase{value: nftPrice}(proposal.nftTokenId);
+        }
+        proposal.executed = true;
+    }
+
+    /// @dev withdrawEther allows the contract owner (deployer) to withdraw the ETH from the contract
+    function withdrawEther() external onlyOwner {
+        uint256 amount = address(this).balance;
+        require(amount > 0, "Nothing to withdraw, contract balance empty");
+        (bool sent, ) = payable(owner()).call{value: amount}("");
+        require(sent, "FAILED_TO_WITHDRAW_ETHER");
+    }
+
+    // The following two functions allow the contract to accept ETH deposits
+    // directly from a wallet without calling a function
+    receive() external payable {}
+
+    fallback() external payable {}
 }
