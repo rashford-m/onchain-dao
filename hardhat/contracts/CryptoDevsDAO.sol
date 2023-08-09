@@ -137,6 +137,23 @@ contract CryptoDevsDAO is Ownable {
         require(numVotes > 0, "ALREADY_VOTED");
         if (vote == Vote.YAY) {
             proposal.YAYvOTES += numVotes;
-        } else
+        } else {
+            proposal.nayVotes += numVotes;
+        }
+    }
+
+    // Create a modifier which only allows a function to be
+    // called if the given proposals' deadline HAS been exceeded
+    // and if the proposal has not yet been executed
+    modifier inactiveProposalOnly(uint256 proposalIndex) {
+        require(
+            proposals[proposalIndex].deadline <= block.timestamp,
+            "DEADLINE_ALREADY_EXCEEDED"
+        );
+        require(
+            proposals[proposalIndex].executed == false,
+            "PROPOSAL_ALREADY_EXECUTED"
+        );
+        _;
     }
 }
