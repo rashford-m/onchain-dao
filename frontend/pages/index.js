@@ -64,22 +64,208 @@ export default function Home() {
     setLoading(true);
 
     try {
-        const tx = await writeContract({
-           address: CryptoDevsDAOAddress,
-           abi: CryptoDevsDAOABI,
-           functionName: "createProposal",
-           args: [fakeNftTokenId],
-
-        });
-        await waitForTransaction(tx);
+      const tx = await writeContract({
+        address: CryptoDevsDAOAddress,
+        abi: CryptoDevsDAOABI,
+        functionName: "createProposal",
+        args: [fakeNftTokenId],
+      });
+      await waitForTransaction(tx);
     } catch (error) {
-        console.error(error);
-        window.alert(error);
+      console.error(error);
+      window.alert(error);
     }
 
     setLoading(false);
   }
 
-  // Function to make a createProposal transaction in the DAO
-  
+  // function to fetch a proposal by it's ID
+  async function fetchProposalById(id) {
+    try {
+      const proposal = await readContract({
+        address: CryptoDevsDAOAddress,
+        abi: CryptoDevsDAOABI,
+        functionName: "proposals",
+        args: [id],
+      });
+
+      const [nftTokenId, deadline, yayVotes, nayVotes, executed] = proposal;
+      const parsedProposal = {
+        proposalId: id,
+        nftTokenId: nftTokenId.toString(),
+        deadline: new Date(parseInt(deadline.toString()) * 1000),
+        yayVotes: yayVotes.toString(),
+        nayVotes: nayVotes.toString(),
+        executed: Boolean(executed),
+      };
+      return parsedProposal;
+    } catch (error) {
+      console.error(error);
+      window.alert(error);
+    }
+  }
+
+  // Function to fetch all proposals in the DAO
+  async function fetchAllProposal() {
+    try {
+      const proposals = [];
+
+      for (let i = 0; i < numOfProposalsInDAO.data; i++) {
+        const proposal = await fetchProposalById(i);
+        proposal.push(proposal);
+      }
+
+      setProposals(proposals);
+      return proposals;
+    } catch (error) {
+      console.error(error);
+      window.alert(error);
+    }
+  }
+
+  // Function to vote YAY or NAY on a proposal
+  async function voteForProposal(proposalId, vote) {
+    setLoading(true);
+    try {
+      const tx = await writeContract({
+        address: CryptoDevsDAOAddress,
+        abi: CryptoDevsDAOABI,
+        functionName: "voteOnProposal",
+        args: [proposalId, vote === "YAY" ? 0 : 1],
+      });
+      await waitForTransaction(tx);
+    } catch (error) {
+      console.error(error);
+      window.alert(error);
+    }
+    setLoading(false);
+  }
+
+  // Function to execute a proposal after deadline has been exceeded
+  async function executeProposal(proposalId) {
+    setLoading(true);
+    try {
+      const tx = await writeContract({
+        address: CryptoDevsDAOAddress,
+        abi: CryptoDevsDAOABI,
+        functionName: "executeProposal",
+        args: [proposalId],
+      });
+      await waitForTransaction(tx);
+    } catch (error) {
+      console.error(error);
+      window.alert(error);
+    }
+    setLoading(false);
+  }
+
+  // Function to withdraw ether from the DAO contract
+  async function withdrawDAOEther() {
+    setLoading(true);
+    try {
+      const tx = await writeContract({
+        address: CryptoDevsDAOAddress,
+        abi: CryptoDevsDAOABI,
+        functionName: "withdrawEther",
+        args: [],
+      });
+
+      await waitForTransaction(tx);
+    } catch (error) {
+      console.error(error);
+      window.alert(error);
+    }
+    setLoading(false);
+  }
+
+  // Render the contents of the appropriate tab based on `selectedTab`
+  function renderTabs() {
+    if (selectedTab === "Create Proposal") {
+      return renderCreateProposalTab();
+    } else if (selectedTab === "View Proposal") {
+      return renderViewProposalTab();
+    }
+    return null;
+  }
+
+  // Renders the 'Create Proposal' tab content
+  function renderCreateProposalTab() {
+    if (loading) {
+      return (
+        <div className={styles.description}>
+          Loading... Waiting for transaction...
+        </div>
+      );
+    } else if (nftBalanceOfUser.data === 0) {
+      return (
+        <div className={styles.description}>
+          You do not own any CryptoDevs NFTs. <br />
+          <b>You cannot create or vote on proposals</b>
+        </div>
+      );
+    } else {
+      return (
+        <div className={styles.container}>
+          <label>Fake NFT Token ID to purchase:</label>
+          <input
+            placeholder="0"
+            type="number"
+            onChange={(e) => setFakeNftTokenId(e.target.value)}
+          />
+          <button className={styles.button2} onClick={createProposal}>
+            Create
+          </button>
+        </div>
+      );
+    }
+  }
+
+  // Renders the 'View Proposals' tab content
+  function renderViewProposalsTab() {
+    if (loading) {
+      return (
+        <div className={styles.description}>
+          Loading... Waiting for transaction...
+        </div>
+      );
+    } else if (proposals.length === 0) {
+      return (
+        <div className={styles.description}>No proposals have been created</div>
+      );
+    } else {
+      return (
+        <div>
+          {proposals.map((p, index) => (
+            <div key={index} className={styles.card}>
+              <p>Proposal ID: {p.proposalId}</p>
+              <p>Fake NFT to purchase: {p.nftTokenId}</p>
+              <p>Deadline: {p.deadline.toLocaleString()}</p>
+              <p>Yay Votes: {p.yayVotes}</p>
+              <p>Nay Votes: {p.nayVotes}</p>
+              <p>Executed?: {p.executed.toString()}</p>
+              {p.deadline.getTime() > Date.now() && !p.executed ? (
+                <div className={styles.flex}>
+                  <button className={styles.button2} onClick={() = voteForProposal(p.proposalId, "YAY")}>
+                    Vote YAY
+                  </button>
+                   <button className={styles.button2} onClick={() => voteForProposal(p.proposalId, "NAY")}>
+                    Vote NAY
+                   </button>
+                </div>
+              )}
+            </div>
+          ) : p.deadline.getTime() < Date.now() && !p.executed ? (
+            <div className={styles.flex}>
+              <button className={styles.button2} onClick={() => executeProposal(p.proposalId)}>
+                Execute Proposal{" "}
+                {p.yayVotes > p.nayVotes ? "(YAY)" : "(NAY)"}
+              </button>
+
+            </div>
+          )
+          )}
+        </div>
+      );
+          }
+  }
 }

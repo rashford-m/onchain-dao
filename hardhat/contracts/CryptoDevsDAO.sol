@@ -71,7 +71,7 @@ contract CryptoDevsDAO is Ownable {
     constructor(address _nftMarketplace, address _cryptoDevsNFT) payable {
         nftMarketplace = IFakeNFTMarketplace(_nftMarketplace);
         cryptoDevsNFT = ICryptoDevsNFT(_cryptoDevsNFT);
-    }
+    } 
 
     // Create a modifier which only allows a function to be
     // called by someone who owns at least 1 CryptoDevsNFT
