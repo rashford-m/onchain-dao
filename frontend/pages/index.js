@@ -1,6 +1,6 @@
 import {
   CryptoDevsDAOABI,
-  CryptoDevsAddress,
+  CryptoDevsDAOAddress,
   CryptoDevsNFTABI,
   CryptoDevsNFTAddress,
 } from "@/constants";
@@ -35,13 +35,13 @@ export default function Home() {
   const [proposals, setProposals] = useState([]);
 
   // State variable to switch between the 'Create Proposal' and 'View Proposals' tabs
-  const [selectedt, setSelectedTab] = useState("");
+  const [selectedTab, setSelectedTab] = useState("");
 
   // State variable to switch between the 'Create Proposal' and 'View Proposals' tabs
   const daoOwner = useContractRead({
     abi: CryptoDevsDAOABI,
     address: CryptoDevsDAOAddress,
-    functionName: "Owner",
+    functionName: "owner",
   });
 
   // Fetch the number of proposals in the DAO
@@ -112,7 +112,7 @@ export default function Home() {
 
       for (let i = 0; i < numOfProposalsInDAO.data; i++) {
         const proposal = await fetchProposalById(i);
-        proposal.push(proposal);
+        proposals.push(proposal);
       }
 
       setProposals(proposals);
@@ -252,7 +252,7 @@ export default function Home() {
                     Vote NAY
                    </button>
                 </div>
-              )}
+              )
             </div>
           ) : p.deadline.getTime() < Date.now() && !p.executed ? (
             <div className={styles.flex}>
@@ -262,8 +262,10 @@ export default function Home() {
               </button>
 
             </div>
-          )
-          )}
+          ) : (<div className={Style.description}>
+            Proposal Executed
+          </div>
+          ))}
         </div>
       );
           }
