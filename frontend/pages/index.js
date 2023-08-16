@@ -221,6 +221,7 @@ export default function Home() {
   }
 
   // Renders the 'View Proposals' tab content
+
   function renderViewProposalsTab() {
     if (loading) {
       return (
@@ -238,36 +239,126 @@ export default function Home() {
           {proposals.map((p, index) => (
             <div key={index} className={styles.card}>
               <p>Proposal ID: {p.proposalId}</p>
-              <p>Fake NFT to purchase: {p.nftTokenId}</p>
+              <p>Fake NFT to Purchase: {p.nftTokenId}</p>
               <p>Deadline: {p.deadline.toLocaleString()}</p>
               <p>Yay Votes: {p.yayVotes}</p>
               <p>Nay Votes: {p.nayVotes}</p>
               <p>Executed?: {p.executed.toString()}</p>
               {p.deadline.getTime() > Date.now() && !p.executed ? (
                 <div className={styles.flex}>
-                  <button className={styles.button2} onClick={() = voteForProposal(p.proposalId, "YAY")}>
+                  <button
+                    className={styles.button2}
+                    onClick={() => voteForProposal(p.proposalId, "YAY")}
+                  >
                     Vote YAY
                   </button>
-                   <button className={styles.button2} onClick={() => voteForProposal(p.proposalId, "NAY")}>
+                  <button
+                    className={styles.button2}
+                    onClick={() => voteForProposal(p.proposalId, "NAY")}
+                  >
                     Vote NAY
-                   </button>
+                  </button>
                 </div>
-              )
+              ) : p.deadline.getTime() < Date.now() && !p.executed ? (
+                <div className={styles.flex}>
+                  <button
+                    className={styles.button2}
+                    onClick={() => executeProposal(p.proposalId)}
+                  >
+                    Execute Proposal{" "}
+                    {p.yayVotes > p.nayVotes ? "(YAY)" : "(NAY)"}
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.description}>Proposal Executed</div>
+              )}
             </div>
-          ) : p.deadline.getTime() < Date.now() && !p.executed ? (
-            <div className={styles.flex}>
-              <button className={styles.button2} onClick={() => executeProposal(p.proposalId)}>
-                Execute Proposal{" "}
-                {p.yayVotes > p.nayVotes ? "(YAY)" : "(NAY)"}
-              </button>
-
-            </div>
-          ) : (<div className={Style.description}>
-            Proposal Executed
-          </div>
           ))}
         </div>
       );
-          }
+    }
   }
+
+  // Piece of code that runs everytime the value of `selectedTab` changes
+  // Used to re-fetch all proposals in the DAO when user switches
+  // to the 'View Proposals' tab
+  useEffect(() => {
+    if (selectedTab === "View Proposals") {
+      fetchAllProposals();
+    }
+  }, [selectedTab]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+
+  if (!isConnected)
+    return (
+      <div>
+        <ConnectButton />
+      </div>
+    );
+
+  return (
+    <div className={inter.className}>
+      <Head>
+        <title>CryptoDevs DAO</title>
+        <meta name="description" content="CryptoDevs DAO" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <div className={styles.main}>
+        <div>
+          <h1 className={styles.title}>Welcome to Crypto Devs!</h1>
+          <div className={styles.description}>Welcome to the DAO!</div>
+          <div className={styles.description}>
+            Your CryptoDevs NFT Balance: {nftBalanceOfUser.data.toString()}
+            <br />
+            {daoBalance.data && (
+              <>
+                Treasury Balance:{" "}
+                {formatEther(daoBalance.data.value).toString()} ETH
+              </>
+            )}
+            <br />
+            Total Number of Proposals: {numOfProposalsInDAO.data.toString()}
+          </div>
+          <div className={styles.flex}>
+            <button
+              className={styles.button}
+              onClick={() => setSelectedTab("Create Proposal")}
+            >
+              Create Proposal
+            </button>
+            <button
+              className={styles.button}
+              onClick={() => setSelectedTab("View Proposals")}
+            >
+              View Proposals
+            </button>
+          </div>
+          {renderTabs()}
+          {/* Display additional withdraw button if connected wallet is owner */}
+          {address && address.toLowerCase() === daoOwner.data.toLowerCase() ? (
+            <div>
+              {loading ? (
+                <button className={styles.button}>Loading...</button>
+              ) : (
+                <button className={styles.button} onClick={withdrawDAOEther}>
+                  Withdraw DAO ETH
+                </button>
+              )}
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
+        <div>
+          <img className={styles.image} src="https://i.imgur.com/buNhbF7.png" />
+        </div>
+      </div>
+    </div>
+  );
 }
