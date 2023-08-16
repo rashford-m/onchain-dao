@@ -30,18 +30,21 @@ export default function Home() {
 
   // Fake NFT Token ID to purchase. Used when creating a proposal.
   const [fakeNftTokenId, setFakeNftTokenId] = useState("");
-
   // State variable to store all proposals in the DAO
   const [proposals, setProposals] = useState([]);
-
   // State variable to switch between the 'Create Proposal' and 'View Proposals' tabs
   const [selectedTab, setSelectedTab] = useState("");
 
-  // State variable to switch between the 'Create Proposal' and 'View Proposals' tabs
+  // Fetch the owner of the DAO
   const daoOwner = useContractRead({
     abi: CryptoDevsDAOABI,
     address: CryptoDevsDAOAddress,
     functionName: "owner",
+  });
+
+  // Fetch the balance of the DAO
+  const daoBalance = useBalance({
+    address: CryptoDevsDAOAddress,
   });
 
   // Fetch the number of proposals in the DAO
@@ -70,16 +73,16 @@ export default function Home() {
         functionName: "createProposal",
         args: [fakeNftTokenId],
       });
+
       await waitForTransaction(tx);
     } catch (error) {
       console.error(error);
       window.alert(error);
     }
-
     setLoading(false);
   }
 
-  // function to fetch a proposal by it's ID
+  // Function to fetch a proposal by it's ID
   async function fetchProposalById(id) {
     try {
       const proposal = await readContract({
@@ -90,6 +93,7 @@ export default function Home() {
       });
 
       const [nftTokenId, deadline, yayVotes, nayVotes, executed] = proposal;
+
       const parsedProposal = {
         proposalId: id,
         nftTokenId: nftTokenId.toString(),
@@ -98,6 +102,7 @@ export default function Home() {
         nayVotes: nayVotes.toString(),
         executed: Boolean(executed),
       };
+
       return parsedProposal;
     } catch (error) {
       console.error(error);
@@ -106,7 +111,7 @@ export default function Home() {
   }
 
   // Function to fetch all proposals in the DAO
-  async function fetchAllProposal() {
+  async function fetchAllProposals() {
     try {
       const proposals = [];
 
@@ -133,6 +138,7 @@ export default function Home() {
         functionName: "voteOnProposal",
         args: [proposalId, vote === "YAY" ? 0 : 1],
       });
+
       await waitForTransaction(tx);
     } catch (error) {
       console.error(error);
@@ -151,6 +157,7 @@ export default function Home() {
         functionName: "executeProposal",
         args: [proposalId],
       });
+
       await waitForTransaction(tx);
     } catch (error) {
       console.error(error);
@@ -182,8 +189,8 @@ export default function Home() {
   function renderTabs() {
     if (selectedTab === "Create Proposal") {
       return renderCreateProposalTab();
-    } else if (selectedTab === "View Proposal") {
-      return renderViewProposalTab();
+    } else if (selectedTab === "View Proposals") {
+      return renderViewProposalsTab();
     }
     return null;
   }
@@ -206,7 +213,7 @@ export default function Home() {
     } else {
       return (
         <div className={styles.container}>
-          <label>Fake NFT Token ID to purchase:</label>
+          <label>Fake NFT Token ID to Purchase: </label>
           <input
             placeholder="0"
             type="number"
@@ -221,7 +228,6 @@ export default function Home() {
   }
 
   // Renders the 'View Proposals' tab content
-
   function renderViewProposalsTab() {
     if (loading) {
       return (
