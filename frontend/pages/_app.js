@@ -1,17 +1,16 @@
 import "@rainbow-me/rainbowkit/styles.css";
 import "@/styles/globals.css";
 
-import { getDefaultWallets } from "@rainbow-me/rainbowkit";
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbow";
+import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
-const { chains, publicClient } = configureChains([goerli], [publicProvider()]);
+const { chains, publicClient } = configureChains([sepolia], [publicProvider()]);
 
 const { connectors } = getDefaultWallets({
   appName: "CryptoDevs DAO",
-  projectId: "7347d431d76364cf68449d90f3cbba4d",
+  projectId: "ADD_YOUR_PROJECT_ID_HERE",
   chains,
 });
 
