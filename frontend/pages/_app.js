@@ -4,13 +4,22 @@ import "@/styles/globals.css";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { goerli } from "wagmi/chains";
-import { publicProvider } from "wagmi/providers/public";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
-const { chains, publicClient } = configureChains([goerli], [publicProvider()]);
+const { chains, publicClient } = configureChains(
+  [goerli],
+  [
+    jsonRpcProvider({
+      rpc: () => ({
+        http: `https://ethereum-goerli.publicnode.com`,
+      }),
+    }),
+  ]
+);
 
 const { connectors } = getDefaultWallets({
   appName: "CryptoDevs DAO",
-  projectId: "ADD_YOUR_PROJECT_ID_HERE",
+  projectId: "7347d431d76364cf68449d90f3cbba4d",
   chains,
 });
 
