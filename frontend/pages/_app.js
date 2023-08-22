@@ -3,10 +3,10 @@ import "@/styles/globals.css";
 
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { sepolia } from "wagmi/chains";
+import { goerli } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
-const { chains, publicClient } = configureChains([sepolia], [publicProvider()]);
+const { chains, publicClient } = configureChains([goerli], [publicProvider()]);
 
 const { connectors } = getDefaultWallets({
   appName: "CryptoDevs DAO",
