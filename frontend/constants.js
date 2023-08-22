@@ -1,5 +1,5 @@
 export const CryptoDevsNFTAddress =
-  "0x031a70430e276E4260a217786446D133910D0935";
+  "0x64622a3356500d97fd8f699fcbdbb97635f83b80";
 export const FakeNFTMarketplaceAddress =
   "0x7c8cdc810675196565be94df02dcb9bb9cf49f3e";
 export const CryptoDevsDAOAddress =
