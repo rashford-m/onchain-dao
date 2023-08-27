@@ -50,4 +50,14 @@ contract LocalVariableExample {
         uint doubleValue = value * 2;
         return doubleValue;
     }
+
+    function calculateOutputAmount(
+        uint inputAmount,
+        uint inputReserve,
+        uint outputReserve
+    ) private pure returns (uint) {
+        uint outputAmount = (outputReserve * inputAmount) /
+            (inputReserve + inputAmount);
+        return outputAmount;
+    }
 }
