@@ -60,4 +60,31 @@ contract LocalVariableExample {
             (inputReserve + inputAmount);
         return outputAmount;
     }
+
+    function addLiquiduty(uint tokenAmount) public payable {
+        // assuming a hypothetical function
+        // that returns the balance of the
+        // token in the contract
+
+        if (getReserve() == 0) {
+            IERC20 token = IERC20(tokenAddress);
+            token.transferFrom(msg.sender, address(this), tokenAmount);
+        } else {
+            uint ethReserve = address(this).balance - msg.value;
+            uint tokenReserve = getReserve();
+            uint proportionalTokenAmount = (msg.value * tokenReserve) /
+                ethReserve;
+            require(
+                tokenAmount >= proportionalTokenAmount,
+                "incorrect ratio of tokens provided"
+            );
+            IERC20 token = IERC20(tokenAddress);
+            token.transferFrom(
+                msg.sender,
+                address(this),
+                proportionalTokenAmount
+            );
+        }
+    }
 }
+

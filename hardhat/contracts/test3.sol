@@ -19,5 +19,19 @@ contract ComplexLogicExample {
             revert("Insufficient balance");
         }
     }
+
+    function addLiquidity (uint tokenAmount) public payable {
+        if (getReserve() == 0) {
+            ...
+
+            
+            uint liquidity = address(this).balance;
+            _mint(msg.sender, liquidity);
+        } else {
+            ...
+            uint liquidity = (totalSupply() * msg.value) / ethReserve;
+            _mint(msg.sender, liquidity);
+        }
+    }
 }
 
